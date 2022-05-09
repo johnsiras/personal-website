@@ -10,22 +10,17 @@ import {
   Paper,
   Transition,
   useMantineColorScheme,
-  SimpleGrid,
   ActionIcon,
-  Input,
-  Badge,
-  Autocomplete,
 } from "@mantine/core";
-import { upperFirst, useBooleanToggle } from "@mantine/hooks";
-import { Link } from "remix";
-import { useNavigate } from "react-router-dom";
-import { useSpotlight } from "@mantine/spotlight";
+import { useBooleanToggle } from "@mantine/hooks";
+import { openSpotlight } from "@mantine/spotlight";
+import { Link } from "react-router-dom";
 import {
   Sun,
   Moon,
   BrandGithub,
-  Search,
   BrandTwitter,
+  Search,
 } from "tabler-icons-react";
 
 const HEADER_HEIGHT = 60;
@@ -138,19 +133,19 @@ export default function HeaderAction({ links, children }: HeaderActionProps) {
     <Header height={HEADER_HEIGHT} mb={120} className={classes.root}>
       <Container className={classes.header} fluid>
         <Group>
-          <Burger
+          {/* <Burger
             opened={opened}
             onClick={() => toggleOpened()}
             className={classes.burger}
             size="sm"
-          />
-          <Transition transition="pop-top-left" duration={200} mounted={opened}>
+          /> */}
+          {/* <Transition transition="fade" duration={200} mounted={opened}>
             {(styles) => (
-              <Paper className={classes.dropdown} withBorder style={styles}>
+              <Paper className={classes.dropdown} withBorder>
                 {items}
               </Paper>
             )}
-          </Transition>
+          </Transition> */}
           <Title order={3}>
             <Text
               component={Link}
@@ -167,14 +162,6 @@ export default function HeaderAction({ links, children }: HeaderActionProps) {
           {items}
         </Group>
         <Group>
-          {/* <Autocomplete
-            transition="scale-y"
-            className={classes.search}
-            onChange={(value) => navigate(value)}
-            icon={<Search size={16} />}
-            placeholder="Search"
-            data={["Home", "About", "Blogs"]}
-          /> */}
           <ActionIcon
             variant="light"
             color={colorScheme === "dark" ? "yellow" : "blue"}
@@ -186,7 +173,16 @@ export default function HeaderAction({ links, children }: HeaderActionProps) {
             <Icon size={16} />
           </ActionIcon>
 
-          <ActionIcon<"a">
+          <ActionIcon
+            variant="outline"
+            size="lg"
+            title="Search..."
+            onClick={() => openSpotlight()}
+          >
+            <Search size={16} />
+          </ActionIcon>
+
+          {/*<ActionIcon<"a">
             variant="outline"
             size="lg"
             className={classes.others}
@@ -208,16 +204,7 @@ export default function HeaderAction({ links, children }: HeaderActionProps) {
             title="Twitter Link"
           >
             <BrandTwitter size={18} />
-          </ActionIcon>
-          {/* <ButtonToggle
-            title="Ctrl + J"
-            ariaLabel="Toggle ColorScheme"
-            icon={<Icon size={18} />}
-            label={`${upperFirst(
-              colorScheme === "light" ? "dark" : "light",
-            )} theme`}
-            onClick={() => toggleColorScheme()}
-          /> */}
+          </ActionIcon> */}
         </Group>
       </Container>
       {children}

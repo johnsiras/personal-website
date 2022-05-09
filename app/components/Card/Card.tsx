@@ -1,6 +1,6 @@
 import React from "react";
 import { Bookmark, Heart, Share } from "tabler-icons-react";
-import { Link } from "remix";
+import { Link } from "@remix-run/react";
 import {
   Avatar,
   Card,
@@ -50,7 +50,6 @@ export default function CardComponent({
   link,
   title,
   description,
-  author,
   ...others
 }: CardProps & Omit<React.ComponentPropsWithoutRef<"div">, keyof CardProps>) {
   const { classes, cx } = useStyles();
@@ -76,15 +75,7 @@ export default function CardComponent({
         {description}
       </Text>
 
-      <Group position="apart" className={classes.footer}>
-        <Center>
-          <Avatar src={author.image} size={24} radius="xl" mr="xs" />
-          <Text size="sm" inline>
-            {author.name}
-          </Text>
-        </Center>
-
-        {/* <Group spacing={8} mr={0}>
+      {/* <Group spacing={8} mr={0}>
           <ActionIcon
             className={classes.action}
             style={{ color: theme.colors.red[6] }}
@@ -101,7 +92,6 @@ export default function CardComponent({
             <Share size={16} />
           </ActionIcon>
         </Group> */}
-      </Group>
     </Card>
   );
 }

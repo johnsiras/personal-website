@@ -1,9 +1,15 @@
-import { Anchor } from "@mantine/core";
-import { Link } from "remix";
+import { Anchor, Container } from "@mantine/core";
+
+import { MetaFunction } from "@remix-run/node";
+import { Link } from "@remix-run/react";
+
+export const meta: MetaFunction = () => ({
+  title: "Johnsiras - Extra Pages",
+});
 
 export default function ExtrasIndex() {
   return (
-    <>
+    <Container>
       <h1>Extras</h1>
 
       <ul>
@@ -12,15 +18,7 @@ export default function ExtrasIndex() {
             Changelogs
           </Anchor>
         </li>
-        <li>
-          <Anchor<typeof Link>
-            component={Link}
-            to="/extras/tools/embed-builder"
-          >
-            Tools
-          </Anchor>
-        </li>
       </ul>
-    </>
+    </Container>
   );
 }

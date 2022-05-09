@@ -3,10 +3,6 @@ type CardProps = {
   link: string;
   title: string;
   description: string;
-  author: {
-    name: string;
-    image: string;
-  };
-}
+};
 
 export type { CardProps };

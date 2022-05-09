@@ -1,12 +1,19 @@
-import { Center, Container, createStyles } from "@mantine/core";
-import Particles from "react-tsparticles";
+import { createStyles, Mark } from "@mantine/core";
 
 const useStyles = createStyles((theme) => ({
   title: {
+    textAlign: "center",
+
+    [theme.fn.smallerThan("sm")]: {
+      fontSize: 20,
+    },
+  },
+
+  highlightedTitle: {
     backgroundImage: theme.fn.linearGradient(
       45,
       theme.colors.indigo[5],
-      theme.colors.cyan[5],
+      theme.colors.cyan[5]
     ),
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
@@ -35,19 +42,18 @@ export default function Demo() {
   const { classes } = useStyles();
 
   return (
-    <Center style={{ height: 200 }}>
-      <h1 style={{ textAlign: "center" }}>
-        Hello 👋! My name's james aka{" "}
-        <span className={classes.title}>johnsiras</span>
+    <>
+      <h1 className={classes.title}>
+        Hello 👋! My name is james aka{" "}
+        <span className={classes.highlightedTitle}>johnsiras</span>
       </h1>
 
       {/* Description */}
       <p className={classes.description}>
-        I'm a <span className={classes.block}>designer</span>,{" "}
-        <span className={classes.block}>developer</span>, and a{" "}
-        <span className={classes.block}>self taught student</span>! I live in
-        the philippines
+        I'm a <Mark color="gray">developer</Mark>,{" "}
+        <Mark color="blue">designer</Mark>, and a{" "}
+        <Mark>self taught student</Mark>.
       </p>
-    </Center>
+    </>
   );
 }

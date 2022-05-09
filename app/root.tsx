@@ -1,6 +1,5 @@
 import {
   Links,
-  LinksFunction,
   LiveReload,
   Meta,
   Outlet,
@@ -8,13 +7,16 @@ import {
   ScrollRestoration,
   useCatch,
   useNavigate,
-} from "remix";
+} from "@remix-run/react";
+import type { LinksFunction } from "@remix-run/node";
+
 import {
   Button,
   ColorScheme,
   ColorSchemeProvider,
   Container,
   createStyles,
+  Divider,
   Global,
   Group,
   MantineProvider,
@@ -24,9 +26,6 @@ import {
   Title,
 } from "@mantine/core";
 
-import { Partytown } from "@builder.io/partytown/react";
-
-// @ts-ignore
 import PrismRenderer from "prism-react-renderer/prism";
 import { useHotkeys, useLocalStorage } from "@mantine/hooks";
 import HeaderAction from "./components/Header/Header";
@@ -34,9 +33,19 @@ import { SpotlightAction, SpotlightProvider } from "@mantine/spotlight";
 import { Home, InfoCircle, Inbox, Search, PaperBag } from "tabler-icons-react";
 import { NotificationsProvider } from "@mantine/notifications";
 
-// @ts-ignore
+import type { MetaFunction } from "@remix-run/node";
+
+declare global {
+  var Prism: string;
+}
+
 (typeof global !== "undefined" ? global : window).Prism = PrismRenderer;
 require("prismjs/components/prism-lua");
+
+/* Meta */
+export const meta: MetaFunction = () => ({
+  title: "Johnsiras | Home",
+});
 
 function Document({ children }: { children: React.ReactNode }) {
   const [colorScheme, setColorScheme] = useLocalStorage<ColorScheme>({
@@ -55,7 +64,6 @@ function Document({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <Partytown debug={true} forward={["dataLayer.push"]} />
         <Meta />
         <Links />
       </head>
@@ -127,7 +135,11 @@ export function ErrorBoundary({ error }: { error: Error }) {
           An error has occurred
         </Title>
         <Paper color="red" shadow="md" radius="md" p="lg" withBorder>
-          <Text>{error.message}</Text>
+          <Text weight="bold">{error.message}</Text>
+
+          <Divider />
+
+          <Text>{error.stack}</Text>
         </Paper>
       </Container>
     </Document>
@@ -246,28 +258,11 @@ export default function App() {
       group: "main",
     },
 
-    {
-      title: "Neovim",
-      onTrigger: () => navigate("/blogs/neovim"),
-      group: "blogs",
-    },
-
     // Sections
     {
       title: "Changelogs",
       onTrigger: () => navigate("/extras/changelogs"),
       group: "extras",
-    },
-    {
-      title: "Tools",
-      onTrigger: () => navigate("/extras/tools"),
-      group: "extras",
-    },
-
-    {
-      title: "Embed Builder",
-      onTrigger: () => navigate("/extras/tools/embed-builder"),
-      group: "tools",
     },
   ];
 
@@ -279,17 +274,21 @@ export default function App() {
         nothingFoundMessage="Nothing found..."
         searchIcon={<Search size={18} />}
         searchPlaceholder="Search..."
-        styles={{
+        styles={(theme) => ({
+          root: {
+            [theme.fn.smallerThan("sm")]: {
+              padding: 5,
+            },
+          },
           spotlight: {
             overflowY: "auto",
             maxHeight: "90vh",
+
+            [theme.fn.smallerThan("sm")]: {
+              maxHeight: "75vh",
+            },
           },
-        }}
-        // style={{
-        //   overflow: "auto",
-        //   maxHeight: "100vh",
-        // }}
-        // topOffset={80}
+        })}
         transition="fade"
         centered
         highlightQuery
@@ -303,9 +302,7 @@ export default function App() {
               { label: "Extras", link: "/extras" },
             ]}
           >
-            <Container>
-              <Outlet />
-            </Container>
+            <Outlet />
           </HeaderAction>
         </NotificationsProvider>
       </SpotlightProvider>
