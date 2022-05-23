@@ -6,6 +6,7 @@ import {
   Scripts,
   ScrollRestoration,
   useCatch,
+  useFetchers,
   useNavigate,
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
@@ -32,12 +33,14 @@ import HeaderAction from "./components/Header/Header";
 import { SpotlightAction, SpotlightProvider } from "@mantine/spotlight";
 import { Home, InfoCircle, Inbox, Search, PaperBag } from "tabler-icons-react";
 import { NotificationsProvider } from "@mantine/notifications";
+import { Prism } from "@mantine/prism";
+
+import NProgress from "nprogress";
+import nProgressStyles from "nprogress/nprogress.css";
+import { useTransition } from "@remix-run/react";
 
 import type { MetaFunction } from "@remix-run/node";
-
-declare global {
-  var Prism: string;
-}
+import React, { useMemo } from "react";
 
 (typeof global !== "undefined" ? global : window).Prism = PrismRenderer;
 require("prismjs/components/prism-lua");
@@ -50,7 +53,7 @@ export const meta: MetaFunction = () => ({
 function Document({ children }: { children: React.ReactNode }) {
   const [colorScheme, setColorScheme] = useLocalStorage<ColorScheme>({
     key: "mantine-color-scheme",
-    defaultValue: "light",
+    defaultValue: "dark",
     getInitialValueInEffect: true,
   });
 
@@ -99,6 +102,7 @@ export const links: LinksFunction = () => {
       href: "https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap",
       rel: "stylesheet",
     },
+    { rel: "stylesheet", href: nProgressStyles },
   ];
 };
 
@@ -265,6 +269,35 @@ export default function App() {
       group: "extras",
     },
   ];
+
+  const transition = useTransition();
+
+  const fetchers = useFetchers();
+
+  /**
+   * This gets the state of every fetcher active on the app and combine it with
+   * the state of the global transition (Link and Form), then use them to
+   * determine if the app is idle or if it's loading.
+   * Here we consider both loading and submitting as loading.
+   */
+  const state = useMemo<"idle" | "loading">(
+    function getGlobalState() {
+      let states = [
+        transition.state,
+        ...fetchers.map((fetcher) => fetcher.state),
+      ];
+      if (states.every((state) => state === "idle")) return "idle";
+      return "loading";
+    },
+    [transition.state, fetchers]
+  );
+
+  NProgress.configure({ showSpinner: false });
+
+  React.useEffect(() => {
+    if (state === "loading") NProgress.start();
+    if (state === "idle") NProgress.done();
+  }, [transition.state]);
 
   return (
     <Document>

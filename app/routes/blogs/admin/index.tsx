@@ -1,31 +1,27 @@
-import { json, redirect } from "@remix-run/server-runtime";
+import { json } from "@remix-run/server-runtime";
 import { useLoaderData, useSearchParams } from "@remix-run/react";
 
 import { ValidatedForm, validationError } from "remix-validated-form";
 import { withZod } from "@remix-validated-form/with-zod";
-import { string, z } from "zod";
+import { z } from "zod";
 
-import {
-  Container,
-  Divider,
-  NumberInput,
-  Paper,
-  SimpleGrid,
-} from "@mantine/core";
+import { Container, NumberInput, Paper, SimpleGrid } from "@mantine/core";
 
-import type {
-  ActionFunction,
-  LoaderFunction,
-  MetaFunction,
-} from "@remix-run/node";
 import {
   TextValidatedArea,
   TextValidatedInput,
   ValidatedButton,
 } from "~/components/ValidatedForm/index";
 
-import { marked } from "marked";
-import { Post, supabase } from "~/services/supabase.server";
+import { Post, PostType } from "~/services/supabase.server";
+import { useState } from "react";
+import { compile } from "~/utils/constants";
+
+import type {
+  ActionFunction,
+  LoaderFunction,
+  MetaFunction,
+} from "@remix-run/node";
 
 export const meta: MetaFunction = () => ({
   title: "Blogs - Admin",
@@ -53,52 +49,44 @@ export const action: ActionFunction = async ({ request }) => {
     const result = await validator.validate(formData);
     if (result.error) return validationError(result.error);
 
-    const { title, body, slug, card } = result.data;
+    const { title, body, slug } = result.data;
 
-    const { createdData, createdError, createdStatus } =
-      await new Post().create({
-        slug,
-        title,
-        body,
-        card: {
-          title: card.title,
-          description: card.description,
-          image: card.image,
-        },
-      });
+    const { Data, error } = await new Post().create({
+      slug: slug || title.replace(/\s+/g, "-").toLowerCase(),
+      title,
+      body,
+    });
 
-    if (createdStatus === 201) return json({ createdData }, { status: 200 });
-    throw createdError;
+    if (error?.code === "201") return json({ Data }, { status: 200 });
+    throw error;
   } catch (err) {
     console.log("error", err);
-    return json({ server: err }, { status: 500 });
+    return json({ Error: err }, { status: 500 });
   }
 };
 
 export const validator = withZod(
   z.object({
     title: z.string().nonempty("Blog title is required."),
-    slug: z.string().nonempty("Blog title is required."),
+    slug: z.string().optional(),
     body: z.string().nonempty("Blog Content is required."),
-
-    card: z.object({
-      title: z.string().nonempty("Card title is required."),
-      image: z
-        .string()
-        .nonempty("Card image is required.")
-        .url("Card image is not a valid image URL."),
-      description: z
-        .string()
-        .nonempty("Card description is required.")
-        .min(3)
-        .max(400),
-    }),
   })
 );
 
 export default function AdminUser() {
-  const loader = useLoaderData<{ isAdmin: boolean; error?: string }>();
+  const loader = useLoaderData<{
+    Data: PostType[] | null;
+    Error: unknown;
+    isAdmin: boolean;
+  }>();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const Data = loader.Data?.find((obj) => obj.body);
+
+  const [state, setState] = useState({
+    tree: compile(Data?.body || "").tree,
+    value: Data?.body || "# Head",
+  });
 
   const if_admin = (
     <>
@@ -118,7 +106,6 @@ export default function AdminUser() {
               placeholder="The blog slug"
               spellCheck={false}
               name="slug"
-              required
             />
 
             <TextValidatedArea
@@ -126,32 +113,15 @@ export default function AdminUser() {
               placeholder="The blog content"
               spellCheck={false}
               name="body"
-              required
-            />
-
-            <Divider my="xs" label="Card" labelPosition="center" />
-
-            <TextValidatedInput
-              label="Card title"
-              placeholder="The card title"
-              spellCheck={false}
-              name="card.title"
-              required
-            />
-
-            <TextValidatedInput
-              label="Card image"
-              placeholder="The card img"
-              spellCheck={false}
-              name="card.image"
-              required
-            />
-
-            <TextValidatedArea
-              label="Card description"
-              placeholder="The card description"
-              spellCheck={false}
-              name="card.description"
+              onChange={(e) => {
+                setState({
+                  tree: compile(e.target.value).tree,
+                  value: e.target.value,
+                });
+              }}
+              value={state.value}
+              minRows={2}
+              autosize
               required
             />
 
@@ -165,6 +135,10 @@ export default function AdminUser() {
             />
           </SimpleGrid>
         </ValidatedForm>
+      </Paper>
+
+      <Paper shadow="lg" p={30} mt={30} radius="md" mb={30} withBorder>
+        {state.tree}
       </Paper>
     </>
   );

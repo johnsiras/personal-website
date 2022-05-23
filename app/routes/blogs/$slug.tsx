@@ -1,11 +1,11 @@
-import { Container, Loader, Center, Title } from "@mantine/core";
-import { Prism } from "@mantine/prism";
+import { Container, Loader, Center, Title, Divider } from "@mantine/core";
 import { json, LoaderFunction } from "@remix-run/node";
 import { useFetcher, useLoaderData } from "@remix-run/react";
-import { marked } from "marked";
 import { useEffect } from "react";
-import { supabase } from "~/services/supabase.server";
+import { PostType, supabase } from "~/services/supabase.server";
+import { compile } from "~/utils/constants";
 
+/* Loader */
 export const loader: LoaderFunction = async ({ params }) => {
   const { data } = await supabase
     .from("blogs")
@@ -15,57 +15,51 @@ export const loader: LoaderFunction = async ({ params }) => {
   return json(data);
 };
 
+/* Page */
 export default function Slug() {
-  const post = useLoaderData();
-  const fetcher = useFetcher();
+  const post = useLoaderData<PostType[] | null>();
+  const fetcher = useFetcher<PostType[] | null>();
 
   const items = fetcher.data || post;
 
   useEffect(() => {
     if (fetcher.type === "init") {
-      fetcher.load(`/blogs/${items.map((post: any) => post.slug)}`);
+      fetcher.load(`/blogs/${items?.map((post) => post.slug)}`);
     }
   }, [fetcher]);
 
-  const mapped = items?.map((post: any) => {
-    const __html = marked.parseInline(post.body);
-
+  const mapped = items?.map((post) => {
     return (
       <main key={post.slug}>
-        <h1 style={{ textAlign: "center" }}>{post.title}</h1>
-        <div dangerouslySetInnerHTML={{ __html }} />
+        <h1 style={{ fontSize: 45 }}>{post.title}</h1>
+
+        <Divider />
+
+        {compile(post.body).tree}
       </main>
     );
   });
 
   return (
     <Container>
-      {post?.toString() ? (
+      {items?.find((x) => x.slug) ? (
         fetcher.type === "done" ? (
           mapped
         ) : (
-          <Center
+          <div
             style={{
-              height: "500px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
             <Loader size="lg" />
-          </Center>
+          </div>
         )
       ) : (
-        <Center
-          style={{
-            height: "500px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Title>That blog/post doesn't exist!</Title>
-        </Center>
+        <Title align="center" mt={20}>
+          That blog/post doesn't exist!
+        </Title>
       )}
     </Container>
   );

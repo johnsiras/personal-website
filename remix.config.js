@@ -4,7 +4,8 @@
 module.exports = {
   serverBuildTarget: "netlify",
   server: "./server.js",
-  ignoredRouteFiles: [".*"]
+  ignoredRouteFiles: [".*"],
+  serverDependenciesToBundle: ["marked-react"]
   // appDirectory: "app",
   // assetsBuildDirectory: "public/build",
   // serverBuildPath: "netlify/functions/server/index.js",

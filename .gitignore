@@ -4,5 +4,7 @@ node_modules
 /public/build
 /.netlify
 package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
 .env

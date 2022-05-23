@@ -14,7 +14,7 @@ import {
 } from "@mantine/core";
 import { useBooleanToggle } from "@mantine/hooks";
 import { openSpotlight } from "@mantine/spotlight";
-import { Link } from "react-router-dom";
+import { Link } from "@remix-run/react";
 import {
   Sun,
   Moon,
@@ -182,7 +182,7 @@ export default function HeaderAction({ links, children }: HeaderActionProps) {
             <Search size={16} />
           </ActionIcon>
 
-          {/*<ActionIcon<"a">
+          <ActionIcon<"a">
             variant="outline"
             size="lg"
             className={classes.others}
@@ -194,17 +194,17 @@ export default function HeaderAction({ links, children }: HeaderActionProps) {
             <BrandGithub size={18} />
           </ActionIcon>
 
-          <ActionIcon<"a">
-            variant="outline"
-            size="lg"
-            className={classes.others}
-            component={"a"}
-            target="_blank"
-            href="https://twitter.com/John_siras"
-            title="Twitter Link"
-          >
-            <BrandTwitter size={18} />
-          </ActionIcon> */}
+          {/* <ActionIcon<"a"> */}
+          {/*   variant="outline" */}
+          {/*   size="lg" */}
+          {/*   className={classes.others} */}
+          {/*   component={"a"} */}
+          {/*   target="_blank" */}
+          {/*   href="https://twitter.com/John_siras" */}
+          {/*   title="Twitter Link" */}
+          {/* > */}
+          {/*   <BrandTwitter size={18} /> */}
+          {/* </ActionIcon> */}
         </Group>
       </Container>
       {children}

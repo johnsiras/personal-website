@@ -6,16 +6,21 @@ const supabaseKey = process.env.SUPABASE_ANON_KEY as string;
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
+export interface PostType {
+  id?: any;
+  slug?: string;
+  title: string;
+  body: string;
+}
+
 // Blog
 export class Post {
-  async create(data: any) {
-    const {
-      data: createdData,
-      error: createdError,
-      status: createdStatus,
-    } = await supabase.from("blogs").insert(data);
+  async create(data: PostType) {
+    const { data: Data, error } = await supabase
+      .from<PostType>("blogs")
+      .insert(data);
 
-    return { createdData, createdError, createdStatus };
+    return { Data, error };
   }
 
   async get(slug: any) {

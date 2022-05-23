@@ -1,48 +1,58 @@
-import { Container, SimpleGrid, Loader, Center } from "@mantine/core";
-import { json, LoaderFunction } from "@remix-run/node";
-import { useFetcher, useLoaderData } from "@remix-run/react";
+import { Container, Loader, Center, Anchor } from "@mantine/core";
+import { json, LoaderFunction, MetaFunction } from "@remix-run/node";
+import { Link, useFetcher, useLoaderData } from "@remix-run/react";
 import { useEffect } from "react";
-import CardComponent from "~/components/Card/Card";
-import { supabase } from "~/services/supabase.server";
+import { PostType, supabase } from "~/services/supabase.server";
+
+export const meta: MetaFunction = () => ({
+  title: "Blogs",
+});
 
 export const loader: LoaderFunction = async () => {
   const { data, error } = await supabase.from("blogs").select();
 
   if (error) throw error;
 
-  return json({ data });
+  return json(data);
 };
 
 export default function Blogs() {
-  const loader = useLoaderData<{ data: any[] | null }>();
-  const post = useFetcher();
+  const loader = useLoaderData<PostType[] | null>();
+  const post = useFetcher<PostType[] | null>();
 
   const items = post.data || loader;
 
   useEffect(() => {
     if (post.type === "init") {
-      post.load(`/blogs`);
+      post.load(`/blogs?index`);
     }
   }, [post]);
 
-  const mapped = items.data?.map((post: any) => (
-    <CardComponent
-      link={`/blogs/${post.slug}`}
-      key={post.slug}
-      description={post.card.description}
-      title={post.card.title}
-      image={post.card.image}
-    />
-  ));
-
   return (
     <Container>
-      {items.data.toString() ? (
+      {items ? (
         post.type === "done" ? (
-          <SimpleGrid cols={5}>{mapped}</SimpleGrid>
+          <div>
+            <h1>Posts</h1>
+            <ul>
+              {items?.map((item) => (
+                <li key={item.slug}>
+                  <Anchor component={Link} to={item.slug!}>
+                    {item.title}
+                  </Anchor>
+                </li>
+              ))}
+            </ul>
+          </div>
         ) : (
-          <Center style={{ marginBottom: 50 }}>
-            <Loader size="md" />
+          <Center
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            Loading Data...
           </Center>
         )
       ) : null}
